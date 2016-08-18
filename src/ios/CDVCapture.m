@@ -131,6 +131,8 @@
     // options could contain limit and mode neither of which are supported at this time
     // taking more than one picture (limit) is only supported if provide own controls via cameraOverlayView property
     // can support mode in OS
+    
+    // added a showToggle option to allow switching between photo and video
 
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         NSLog(@"Capture.imageCapture: camera not available.");
@@ -147,6 +149,17 @@
         if ([pickerController respondsToSelector:@selector(mediaTypes)]) {
             // iOS 3.0
             pickerController.mediaTypes = [NSArray arrayWithObjects:(NSString*)kUTTypeImage, nil];
+        }
+        
+        NSArray* types = nil;
+        NSNumber *showToogle = options[@"showToggle"];
+        if (showToogle && [showToogle isKindOfClass:[NSNumber class]] && showToogle.boolValue && [UIImagePickerController respondsToSelector:@selector(availableMediaTypesForSourceType:)]) {
+            types = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypeCamera];
+            if ([types containsObject:(NSString*)kUTTypeMovie]) {
+                pickerController.mediaTypes = [NSArray arrayWithObjects:(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie, nil];
+            } else if ([types containsObject:(NSString*)kUTTypeVideo]) {
+                pickerController.mediaTypes = [NSArray arrayWithObjects:(NSString*)kUTTypeImage, (NSString*)kUTTypeVideo, nil];
+            }
         }
 
         /*if ([pickerController respondsToSelector:@selector(cameraCaptureMode)]){
@@ -251,7 +264,13 @@
         pickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
         pickerController.allowsEditing = NO;
         // iOS 3.0
-        pickerController.mediaTypes = [NSArray arrayWithObjects:mediaType, nil];
+        
+        NSNumber *showToogle = options[@"showToggle"];
+        if (showToogle && [showToogle isKindOfClass:[NSNumber class]] && showToogle.boolValue) {
+            pickerController.mediaTypes = [NSArray arrayWithObjects:mediaType, (NSString*)kUTTypeImage, nil];
+        } else {
+            pickerController.mediaTypes = [NSArray arrayWithObjects:mediaType, nil];
+        }
 
         if ([mediaType isEqualToString:(NSString*)kUTTypeMovie]){
             if (duration) {
