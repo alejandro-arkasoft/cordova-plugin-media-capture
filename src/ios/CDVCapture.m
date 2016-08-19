@@ -170,6 +170,12 @@
         }*/
         // CDVImagePicker specific property
         pickerController.callbackId = callbackId;
+        pickerController.saveToPhotoAlbum = YES; //default value
+        
+        NSNumber *saveToPhotoAlbum = options[@"saveToPhotoAlbum"];
+        if (saveToPhotoAlbum && [saveToPhotoAlbum isKindOfClass:[NSNumber class]]) {
+            pickerController.saveToPhotoAlbum = [saveToPhotoAlbum boolValue];
+        }
 
         [self.viewController presentViewController:pickerController animated:YES completion:nil];
     }
@@ -184,8 +190,10 @@
 {
     CDVPluginResult* result = nil;
 
-    // save the image to photo album
-    UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+    if (pickerController.saveToPhotoAlbum) {
+        // save the image to photo album
+        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
+    }
 
     NSData* data = nil;
     if (mimeType && [mimeType isEqualToString:@"image/png"]) {
